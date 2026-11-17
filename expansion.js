@@ -4,11 +4,13 @@ if(window.LAST_SIGNAL_PHOTOS){
     if(!galleryPhotos.some(existing=>existing.src===p.src))galleryPhotos.push(p);
   });
 }
-apps.splice(4,0,['games','ألعاب','games','games-icon'],['witness','شاهد','witness','witness-icon'],['tickets','تذاكر','tickets','tickets-icon']);
+var facetimeApp=apps.find(a=>a[0]==='facetime');
+if(facetimeApp)facetimeApp.splice(0,4,'contacts','جهات الاتصال','contacts','contacts-icon');
+apps.splice(4,0,['games','ألعاب','games','games-icon']);
 var baseIcon=icon;
-icon=function(name){var e={games:'🎮',witness:'▶',tickets:'✈️'};return e[name]?'<span class="custom-app-icon">'+e[name]+'</span>':baseIcon(name)};
+icon=function(name){var e={games:'🎮',contacts:'👤'};return e[name]?'<span class="custom-app-icon">'+e[name]+'</span>':baseIcon(name)};
 $('apps').innerHTML=apps.filter(a=>!['phone','safari','sms','music','search'].includes(a[0])).map(a=>`<button class="app" onclick="openApp('${a[0]}')"><span class="icon ${a[3]}">${icon(a[2])}</span><span>${a[1]}</span>${a[0]==='messages'?'<i class="dot">3</i>':''}</button>`).join('');
-$('dock').innerHTML=['phone','safari','games','tickets'].map(id=>apps.find(a=>a[0]===id)).map(a=>`<button onclick="openApp('${a[0]}')" aria-label="${a[1]}"><span class="icon ${a[3]}">${icon(a[2])}</span></button>`).join('');
+$('dock').innerHTML=['phone','safari','games','music'].map(id=>apps.find(a=>a[0]===id)).map(a=>`<button onclick="openApp('${a[0]}')" aria-label="${a[1]}"><span class="icon ${a[3]}">${icon(a[2])}</span></button>`).join('');
 function culturaText(html){return html.replaceAll('مرفأ المنارة','مقهى كلتورا').replaceAll('مقهى المنارة','مقهى كلتورا').replaceAll('في المقهى','في مقهى كلتورا').replaceAll('طاولة المقهى','طاولة مقهى كلتورا')}
 var lockNotifications=document.querySelector('.notifications');
 if(lockNotifications)lockNotifications.innerHTML=culturaText(lockNotifications.innerHTML);
@@ -64,12 +66,17 @@ function startMemory(){gameMode='memory';memoryOpen=[];memoryMatched=[];render()
 function flipMemory(i){if(memoryOpen.includes(i)||memoryMatched.includes(i)||memoryOpen.length===2)return;memoryOpen.push(i);render();if(memoryOpen.length===2){var vals=['☕','✈️','🎬','🍦','☕','✈️','🎬','🍦'];setTimeout(()=>{if(vals[memoryOpen[0]]===vals[memoryOpen[1]])memoryMatched.push(...memoryOpen);memoryOpen=[];render();if(memoryMatched.length===8)toast('كفو! خلصتيها كلها 🎉')},650)}}
 function startTap(){gameMode='tap';tapScore=0;clearTimeout(tapTimer);tapTimer=setTimeout(()=>{toast('خلص الوقت! نتيجتك '+tapScore);gameMode=null;render()},10000);render()}
 
+function contactsHTML(){
+  var people=[['أ','أمي','+966 5• ••• ••21'],['س','سارة','+966 5• ••• ••44'],['ن','ناصر','+966 5• ••• •019'],['م','مكتب التوثيق','011 ••• ••47']];
+  if(detail){var p=people.find(x=>x[1]===detail);if(!p)return '';return '<div class="contact-detail"><div class="contact-avatar">'+p[0]+'</div><h2>'+p[1]+'</h2><p dir="ltr">'+p[2]+'</p><div class="contact-actions"><button onclick="toast(\'الاتصال غير متاح في النسخة المحفوظة\')">☎<small>اتصال</small></button><button onclick="openApp(\'messages\')">✉<small>رسالة</small></button><button onclick="toast(\'مشاركة جهة الاتصال\')">↗<small>مشاركة</small></button></div><div class="iosgroup"><div class="iosrow"><span class="rowtext"><small>رقم الجوال</small><b dir="ltr">'+p[2]+'</b></span></div></div></div>'}
+  return title('جهات الاتصال')+'<input class="iossearch" placeholder="⌕ بحث" aria-label="بحث في جهات الاتصال"><p class="sectionlabel">المفضلة</p><div class="iosgroup contacts-list">'+people.map(p=>`<button class="iosrow" onclick="openDetail('${p[1]}')"><span class="contact-mini">${p[0]}</span><span class="rowtext"><b>${p[1]}</b><small dir="ltr">${p[2]}</small></span><span class="chev">‹</span></button>`).join('')+'</div>';
+}
+
 var baseRender=render;
 render=function(){
   baseRender();
   if(current==='safari'){$('content').innerHTML=safariHTML();$('appTitle').textContent='سفاري'}
   else if(current==='games'){$('content').innerHTML='<div class="appbody">'+gamesHTML()+'</div>';$('appTitle').textContent='ألعاب'}
-  else if(current==='witness'){$('content').innerHTML='<div class="appbody">'+title('شاهد')+'<div class="witness-card"><h2>كمّلي المشاهدة</h2><div class="play">▶</div><p>حلقة ١٧ · باقي ٢٤ دقيقة</p><button class="btn" onclick="toast(\'تم حفظ الحلقة للمشاهدة لاحقًا\')">+ قائمتي</button></div></div>';$('appTitle').textContent='شاهد'}
-  else if(current==='tickets'){$('content').innerHTML='<div class="appbody">'+title('تذاكري')+'<div class="ticket-pass"><small>رحلة محفوظة</small><br><strong>RUH ✈ JED</strong><p>الرياض ← جدة</p><small>٢٢ نوفمبر · ٨:٣٠ ص</small></div><div class="iosgroup">'+row('البحث عن رحلة','قارني الرحلات والأسعار',"openApp('safari');setTimeout(()=>setSafariTab('travel'),0)",'⌕')+row('بطاقات الصعود','ما فيه رحلة نشطة',"toast('ما عندك بطاقة صعود حالية')",'▤')+'</div></div>';$('appTitle').textContent='تذاكر'}
+  else if(current==='contacts'){$('content').innerHTML='<div class="appbody">'+contactsHTML()+'</div>';$('appTitle').textContent=detail||'جهات الاتصال'}
   if($('content'))$('content').innerHTML=culturaText($('content').innerHTML);
 };
