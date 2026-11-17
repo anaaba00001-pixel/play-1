@@ -7,8 +7,11 @@ if(window.LAST_SIGNAL_PHOTOS){
 var facetimeApp=apps.find(a=>a[0]==='facetime');
 if(facetimeApp)facetimeApp.splice(0,4,'contacts','جهات الاتصال','contacts','contacts-icon');
 apps.splice(4,0,['games','ألعاب','games','games-icon']);
+var phoneApp=apps.find(a=>a[0]==='phone'),musicApp=apps.find(a=>a[0]==='music');
+if(phoneApp)phoneApp[3]='phone-icon';
+if(musicApp)musicApp[3]='music-icon';
 var baseIcon=icon;
-icon=function(name){var e={games:'🎮',contacts:'👤'};return e[name]?'<span class="custom-app-icon">'+e[name]+'</span>':baseIcon(name)};
+icon=function(name){var e={games:'🎮',contacts:'👤',phone:'☎',music:'♪'};return e[name]?'<span class="custom-app-icon">'+e[name]+'</span>':baseIcon(name)};
 $('apps').innerHTML=apps.filter(a=>!['phone','safari','sms','music','search'].includes(a[0])).map(a=>`<button class="app" onclick="openApp('${a[0]}')"><span class="icon ${a[3]}">${icon(a[2])}</span><span>${a[1]}</span>${a[0]==='messages'?'<i class="dot">3</i>':''}</button>`).join('');
 $('dock').innerHTML=['phone','safari','games','music'].map(id=>apps.find(a=>a[0]===id)).map(a=>`<button onclick="openApp('${a[0]}')" aria-label="${a[1]}"><span class="icon ${a[3]}">${icon(a[2])}</span></button>`).join('');
 function culturaText(html){return html.replaceAll('مرفأ المنارة','مقهى كلتورا').replaceAll('مقهى المنارة','مقهى كلتورا').replaceAll('في المقهى','في مقهى كلتورا').replaceAll('طاولة المقهى','طاولة مقهى كلتورا')}

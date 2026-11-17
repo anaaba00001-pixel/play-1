@@ -1,0 +1,4 @@
+.phone-icon{background:linear-gradient(160deg,#63e77c,#11a849)!important;color:#fff}
+.music-icon{background:linear-gradient(160deg,#ff657e,#e92d55)!important;color:#fff}
+.phone-icon .custom-app-icon{font-size:27px;transform:rotate(-18deg)}
+.music-icon .custom-app-icon{font-size:39px;font-weight:700}
