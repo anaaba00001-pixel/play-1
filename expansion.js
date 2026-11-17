@@ -6,6 +6,8 @@ if(window.LAST_SIGNAL_PHOTOS){
 }
 var facetimeApp=apps.find(a=>a[0]==='facetime');
 if(facetimeApp)facetimeApp.splice(0,4,'contacts','جهات الاتصال','contacts','contacts-icon');
+var gmailIndex=apps.findIndex(a=>a[0]==='gmail');
+if(gmailIndex>=0)apps.splice(gmailIndex,1);
 apps.splice(4,0,['games','ألعاب','games','games-icon']);
 var phoneApp=apps.find(a=>a[0]==='phone'),musicApp=apps.find(a=>a[0]==='music');
 if(phoneApp)phoneApp[3]='phone-icon';
