@@ -2,8 +2,8 @@
 (function () {
   'use strict';
 
-  var DURATION_OPEN = 460;
-  var DURATION_EXIT = 480;
+  var DURATION_OPEN = 760;
+  var DURATION_EXIT = 680;
   var EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
   var origGoHome = window.goHome;
