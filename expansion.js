@@ -85,3 +85,178 @@ render=function(){
   else if(current==='contacts'){$('content').innerHTML='<div class="appbody">'+contactsHTML()+'</div>';$('appTitle').textContent=detail||'جهات الاتصال'}
   if($('content'))$('content').innerHTML=culturaText($('content').innerHTML);
 };
+var podcastPlaying = false;
+
+window.podcastTabs = function () {
+  var active = detail || 'listen';
+  return tabs([
+    ['▶', 'استمع الآن', "openDetail(null)", active === 'listen'],
+    ['▦', 'تصفح', "openDetail('browse')", active === 'browse'],
+    ['▤', 'المكتبة', "openDetail('library')", active === 'library'],
+    ['⌕', 'بحث', "openDetail('search')", active === 'search']
+  ]);
+};
+
+function podcastCover(kind, title, kicker) {
+  return '<div class="pod-cover ' + kind + '"><small>' + kicker + '</small><strong>' + title + '</strong><i>◉</i></div>';
+}
+
+window.togglePodcastPlay = function () {
+  podcastPlaying = !podcastPlaying;
+  var button = document.getElementById('podPlayButton');
+  var status = document.getElementById('podPlayStatus');
+  if (button) button.textContent = podcastPlaying ? '❚❚' : '▶';
+  if (status) status.textContent = podcastPlaying ? 'يتم التشغيل الآن' : 'متوقف مؤقتًا';
+};
+
+window.filterPodcasts = function (query) {
+  var cards = document.querySelectorAll('.pod-search-item');
+  var value = (query || '').trim();
+  cards.forEach(function (card) {
+    card.hidden = value && !card.textContent.includes(value);
+  });
+  var empty = document.getElementById('podSearchEmpty');
+  if (empty) empty.hidden = Array.from(cards).some(function (card) { return !card.hidden; });
+};
+
+window.podcastHTML = function () {
+  if (detail === 'episode') {
+    return '<div class="podcast-app pod-episode">' +
+      '<button class="pod-back" onclick="openDetail(null)">تم</button>' +
+      podcastCover('coast', 'حكايات الساحل', 'بودكاست أصلي') +
+      '<p class="pod-kicker">حلقة جديدة</p><h2>تفاصيل لا ننساها</h2>' +
+      '<p class="pod-meta">حكايات الساحل · ٣٨ دقيقة</p>' +
+      '<p class="pod-description">رحلة صوتية إلى الأماكن الصغيرة التي تحتفظ بذكرياتنا، والمقاهي التي نعود إليها مهما ابتعدنا.</p>' +
+      '<div class="pod-progress"><i></i></div><div class="pod-times"><span>١٢:٤٦</span><span>−٢٥:١٤</span></div>' +
+      '<div class="pod-player-controls"><button>↶<small>15</small></button><button id="podPlayButton" class="pod-main-play" onclick="togglePodcastPlay()">' + (podcastPlaying ? '❚❚' : '▶') + '</button><button>↷<small>30</small></button></div>' +
+      '<p id="podPlayStatus" class="pod-status">' + (podcastPlaying ? 'يتم التشغيل الآن' : 'متوقف مؤقتًا') + '</p></div>';
+  }
+  if (detail === 'browse') {
+    return '<div class="podcast-app"><div class="pod-topline"><h1>تصفح</h1><span class="pod-avatar">ل</span></div>' +
+      '<h3 class="pod-section-title">استكشف حسب التصنيف</h3><div class="pod-categories">' +
+      '<button class="violet">قصص</button><button class="green">مجتمع وثقافة</button><button class="blue">تعليم</button><button class="orange">كوميديا</button><button class="pink">صحة</button><button class="navy">أخبار</button></div>' +
+      '<h3 class="pod-section-title">الأكثر استماعًا</h3><div class="pod-ranked"><b>١</b>' + podcastCover('mind', 'نقطة تحوّل', 'حوارات') + '<span><strong>نقطة تحوّل</strong><small>حلقة كل أسبوع</small></span></div>' +
+      '<div class="pod-ranked"><b>٢</b>' + podcastCover('night', 'قبل النوم', 'قصص هادئة') + '<span><strong>قبل النوم</strong><small>قصص قصيرة</small></span></div></div>';
+  }
+  if (detail === 'library') {
+    return '<div class="podcast-app"><div class="pod-topline"><h1>المكتبة</h1><span class="pod-avatar">ل</span></div>' +
+      '<div class="pod-library-links"><button>أحدث الحلقات <b>٨</b></button><button>المحفوظة <b>٣</b></button><button>تم التنزيل <b>٢</b></button></div>' +
+      '<h3 class="pod-section-title">برامجي</h3><div class="pod-grid">' +
+      '<button onclick="openDetail(\'episode\')">' + podcastCover('coast', 'حكايات الساحل', 'قصص') + '<b>حكايات الساحل</b></button>' +
+      '<button>' + podcastCover('mind', 'نقطة تحوّل', 'حوارات') + '<b>نقطة تحوّل</b></button>' +
+      '<button>' + podcastCover('night', 'قبل النوم', 'هدوء') + '<b>قبل النوم</b></button></div></div>';
+  }
+  if (detail === 'search') {
+    return '<div class="podcast-app"><div class="pod-topline"><h1>بحث</h1><span class="pod-avatar">ل</span></div>' +
+      '<input class="pod-search" type="search" placeholder="البحث عن برامج وحلقات" oninput="filterPodcasts(this.value)">' +
+      '<h3 class="pod-section-title">اقتراحات لك</h3><div class="pod-search-list">' +
+      '<button class="pod-search-item" onclick="openDetail(\'episode\')">' + podcastCover('coast', 'حكايات الساحل', 'قصص') + '<span><strong>حكايات الساحل</strong><small>قصص من مدننا</small></span></button>' +
+      '<button class="pod-search-item">' + podcastCover('mind', 'نقطة تحوّل', 'حوارات') + '<span><strong>نقطة تحوّل</strong><small>أفكار صنعت الفرق</small></span></button>' +
+      '<button class="pod-search-item">' + podcastCover('night', 'قبل النوم', 'هدوء') + '<span><strong>قبل النوم</strong><small>قصص بصوت هادئ</small></span></button></div>' +
+      '<p id="podSearchEmpty" class="pod-empty" hidden>لا توجد نتائج مطابقة</p></div>';
+  }
+  return '<div class="podcast-app"><div class="pod-topline"><div><small>السبت، ٢١ نوفمبر</small><h1>استمع الآن</h1></div><span class="pod-avatar">ل</span></div>' +
+    '<button class="pod-hero" onclick="openDetail(\'episode\')">' + podcastCover('coast large', 'حكايات الساحل', 'بودكاست أصلي') + '<span><small>حلقة جديدة</small><strong>تفاصيل لا ننساها</strong><em>٣٨ دقيقة</em></span></button>' +
+    '<h3 class="pod-section-title">قد يعجبك</h3><div class="pod-grid">' +
+    '<button>' + podcastCover('mind', 'نقطة تحوّل', 'حوارات') + '<b>نقطة تحوّل</b><small>أفكار صنعت الفرق</small></button>' +
+    '<button>' + podcastCover('night', 'قبل النوم', 'قصص') + '<b>قبل النوم</b><small>حكاية جديدة</small></button></div>' +
+    '<h3 class="pod-section-title">أحدث الحلقات</h3><button class="pod-latest" onclick="openDetail(\'episode\')">' + podcastCover('coast', 'حكايات الساحل', 'قصص') + '<span><b>تفاصيل لا ننساها</b><small>اليوم · ٣٨ دقيقة</small></span><i>▶</i></button></div>';
+};
+window.weatherHTML = function () {
+  var hours = [
+    ['الآن', '☀', '٢٤°'], ['١٠ م', '☾', '٢٢°'], ['١١ م', '☾', '٢١°'],
+    ['١٢ ص', '☾', '٢٠°'], ['١ ص', '☁', '٢٠°'], ['٢ ص', '☁', '١٩°']
+  ];
+  var days = [
+    ['اليوم', '☀', '١٧°', 72, '٢٨°'], ['الأحد', '☀', '١٦°', 78, '٢٩°'],
+    ['الاثنين', '🌤', '١٨°', 66, '٢٧°'], ['الثلاثاء', '☁', '١٧°', 59, '٢٦°'],
+    ['الأربعاء', '🌧', '١٥°', 47, '٢٤°'], ['الخميس', '🌤', '١٦°', 63, '٢٧°'],
+    ['الجمعة', '☀', '١٨°', 80, '٣٠°'], ['السبت', '☀', '١٩°', 85, '٣١°']
+  ];
+  return '<div class="weather-app">' +
+    '<div class="weather-clouds"></div>' +
+    '<header class="weather-actions"><button onclick="toast(\'الموقع الحالي: الرياض\')">⌖</button><button onclick="toast(\'قائمة المدن المحفوظة\')">☷</button></header>' +
+    '<section class="weather-current"><h1>الرياض</h1><div class="weather-degree">٢٤°</div><p>صحو غالبًا</p><strong>العظمى: ٢٨°　الصغرى: ١٧°</strong></section>' +
+    '<section class="weather-glass weather-summary"><p>طقس صافٍ خلال المساء. من المتوقع أن تصبح السماء غائمة جزئيًا قرابة منتصف الليل.</p>' +
+    '<div class="weather-hours">' + hours.map(function (hour) {
+      return '<div><b>' + hour[0] + '</b><i>' + hour[1] + '</i><strong>' + hour[2] + '</strong></div>';
+    }).join('') + '</div></section>' +
+    '<section class="weather-glass weather-days"><h2>توقعات ٨ أيام</h2>' + days.map(function (day) {
+      return '<div class="weather-day"><b>' + day[0] + '</b><i>' + day[1] + '</i><span>' + day[2] + '</span><em><u style="width:' + day[3] + '%"></u></em><strong>' + day[4] + '</strong></div>';
+    }).join('') + '</section>' +
+    '<div class="weather-extras"><section class="weather-glass"><small>الإحساس الفعلي</small><b>٢٣°</b><p>مشابه لدرجة الحرارة الفعلية.</p></section><section class="weather-glass"><small>الرطوبة</small><b>٣٢٪</b><p>نقطة الندى الآن ٦°.</p></section></div>' +
+    '</div>';
+};
+var voiceMemoPlaying = false;
+var voiceMemoRecording = false;
+var voiceMemoSeconds = 0;
+var voiceMemoTimer = null;
+var voiceMemos = [
+  { id: 'idea', title: 'فكرة قبل النوم', date: 'اليوم، ١٠:٤٢ م', duration: '٠٠:٤٧', topic: 'أفكار شخصية عن الكتابة والعودة إلى تدوين تفاصيل الأيام.' },
+  { id: 'meeting', title: 'ملخص اجتماع المشروع', date: 'اليوم، ٢:١٥ م', duration: '٠٢:١٨', topic: 'النقاط الرئيسية والمهام المتفق عليها في اجتماع الفريق.' },
+  { id: 'cafe', title: 'أصوات المقهى', date: 'أمس، ٦:٣٤ م', duration: '٠١:٠٩', topic: 'تسجيل للأجواء الهادئة وأصوات فناجين القهوة في المقهى.' },
+  { id: 'book', title: 'ملاحظة عن الكتاب', date: '١٨ نوفمبر، ٩:٠٥ م', duration: '٠٠:٣٦', topic: 'اقتباس وانطباع سريع بعد إنهاء الفصل الأخير.' },
+  { id: 'trip', title: 'خطة رحلة نهاية الأسبوع', date: '١٥ نوفمبر، ٤:٢٠ م', duration: '٠١:٤٤', topic: 'قائمة بالأماكن المقترحة والأغراض التي يجب تجهيزها.' },
+  { id: 'shore', title: 'المشي عند الساحل', date: '٩ نوفمبر، ٥:٥٨ م', duration: '٠٣:١٢', topic: 'خواطر قصيرة أثناء المشي وصوت البحر في الخلفية.' }
+];
+
+function voiceWave(seed, count) {
+  return '<div class="vm-wave">' + Array.from({ length: count || 54 }, function (_, i) {
+    var height = 9 + ((i * 17 + seed * 13) % 38);
+    return '<i style="height:' + height + 'px"></i>';
+  }).join('') + '<span></span></div>';
+}
+
+window.toggleVoiceMemo = function () {
+  voiceMemoPlaying = !voiceMemoPlaying;
+  var button = document.getElementById('vmPlay');
+  if (button) button.textContent = voiceMemoPlaying ? '❚❚' : '▶';
+  var line = document.querySelector('.vm-wave span');
+  if (line) line.classList.toggle('playing', voiceMemoPlaying);
+};
+
+window.toggleVoiceRecording = function () {
+  voiceMemoRecording = !voiceMemoRecording;
+  var button = document.getElementById('vmRecord');
+  var time = document.getElementById('vmRecordTime');
+  if (button) button.classList.toggle('recording', voiceMemoRecording);
+  if (voiceMemoRecording) {
+    voiceMemoTimer = setInterval(function () {
+      voiceMemoSeconds++;
+      if (time) time.textContent = '٠٠:' + String(voiceMemoSeconds).padStart(2, '0');
+    }, 1000);
+  } else {
+    clearInterval(voiceMemoTimer);
+    if (voiceMemoSeconds > 0) toast('تم حفظ التسجيل الجديد مؤقتًا');
+  }
+};
+
+window.voiceHTML = function () {
+  if (detail && detail.indexOf('menu:') === 0) {
+    var menuId = detail.split(':')[1];
+    var menuMemo = voiceMemos.find(function (memo) { return memo.id === menuId; }) || voiceMemos[0];
+    return '<div class="voice-memos vm-dimmed">' + voiceMemoList() + '</div><div class="vm-sheet">' +
+      '<div class="vm-sheet-handle"></div><h3>' + menuMemo.title + '</h3>' +
+      '<button onclick="toast(\'يمكن تعديل اسم التسجيل من هنا\')">تعديل التسجيل <b>✦</b></button>' +
+      '<button onclick="toast(\'تم إنشاء نسخة من التسجيل\')">إنشاء نسخة <b>▣</b></button>' +
+      '<button onclick="toast(\'خيارات المشاركة جاهزة\')">مشاركة… <b>↥</b></button>' +
+      '<button class="vm-cancel" onclick="openDetail(null)">إلغاء</button></div>';
+  }
+  if (detail) {
+    var memo = voiceMemos.find(function (item) { return item.id === detail; }) || voiceMemos[0];
+    var seed = voiceMemos.indexOf(memo) + 2;
+    return '<div class="voice-memos vm-detail"><header><button onclick="openDetail(null)">تم</button><span></span><button onclick="openDetail(\'menu:' + memo.id + '\')">•••</button></header>' +
+      '<div class="vm-detail-title"><h2>' + memo.title + '</h2><p>' + memo.date + '</p></div>' +
+      voiceWave(seed, 64) + '<div class="vm-timeline"><span>٠٠:٠٠</span><span>' + memo.duration + '</span></div>' +
+      '<div class="vm-elapsed">٠٠:٠٣٫٧٠</div><div class="vm-controls"><button>↶<small>15</small></button><button id="vmPlay" class="vm-play" onclick="toggleVoiceMemo()">' + (voiceMemoPlaying ? '❚❚' : '▶') + '</button><button>↷<small>15</small></button></div>' +
+      '<p class="vm-topic">' + memo.topic + '</p><div class="vm-replace"><button>استبدال</button></div></div>';
+  }
+  return '<div class="voice-memos">' + voiceMemoList() + '</div>';
+};
+
+function voiceMemoList() {
+  return '<header class="vm-list-header"><button>تعديل</button><h1>المذكرات الصوتية</h1></header>' +
+    '<div class="vm-search">⌕　بحث</div><div class="vm-list">' + voiceMemos.map(function (memo, index) {
+      return '<button class="vm-row" onclick="openDetail(\'' + memo.id + '\')"><span><b>' + memo.title + '</b><small>' + memo.date + '</small></span><time>' + memo.duration + '</time><em>•••</em></button>';
+    }).join('') + '</div><div class="vm-recorder"><time id="vmRecordTime">٠٠:٠٠</time>' + voiceWave(7, 45) + '<button id="vmRecord" class="vm-record" onclick="toggleVoiceRecording()"><i></i></button></div>';
+}
