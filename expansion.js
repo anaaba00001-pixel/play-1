@@ -231,6 +231,13 @@ window.toggleVoiceRecording = function () {
   }
 };
 
+window.exitVoiceMemos = function () {
+  voiceMemoPlaying = false;
+  voiceMemoRecording = false;
+  clearInterval(voiceMemoTimer);
+  goHome();
+};
+
 window.voiceHTML = function () {
   if (detail && detail.indexOf('menu:') === 0) {
     var menuId = detail.split(':')[1];
@@ -255,7 +262,7 @@ window.voiceHTML = function () {
 };
 
 function voiceMemoList() {
-  return '<header class="vm-list-header"><button>تعديل</button><h1>المذكرات الصوتية</h1></header>' +
+  return '<header class="vm-list-header"><button>تعديل</button><h1>المذكرات الصوتية</h1><button class="vm-exit" onclick="exitVoiceMemos()" aria-label="إغلاق المذكرات الصوتية">×</button></header>' +
     '<div class="vm-search">⌕　بحث</div><div class="vm-list">' + voiceMemos.map(function (memo, index) {
       return '<button class="vm-row" onclick="openDetail(\'' + memo.id + '\')"><span><b>' + memo.title + '</b><small>' + memo.date + '</small></span><time>' + memo.duration + '</time><em>•••</em></button>';
     }).join('') + '</div><div class="vm-recorder"><time id="vmRecordTime">٠٠:٠٠</time>' + voiceWave(7, 45) + '<button id="vmRecord" class="vm-record" onclick="toggleVoiceRecording()"><i></i></button></div>';
